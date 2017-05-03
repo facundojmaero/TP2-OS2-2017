@@ -17,10 +17,11 @@
 *
 * @param file_name[] El nombre del archivo a leer
 * @param pulsos[] Arreglo de estructuras de tipo pulso, donde guardar la información leida.
+* @param cant_pulsos Puntero a variable para devolver la cantidad de pulsos leida.
 * @return 1 si hubo un error, 0 caso contrario.
 */
 int
-leer_archivo(char file_name[], struct Pulso pulsos[NUM_PULSOS_ARCHIVO]){
+leer_archivo(char file_name[], struct Pulso pulsos[], int* cant_pulsos){
 	FILE *ptr;
 	uint16_t valid_samples;
 	float muestra[2];
@@ -76,6 +77,7 @@ leer_archivo(char file_name[], struct Pulso pulsos[NUM_PULSOS_ARCHIVO]){
 	}
 	
 	fclose(ptr);
+	*cant_pulsos = num_pulso;
 	printf("Lectura terminada.\n");
 	return 0;
 }
@@ -105,42 +107,49 @@ valor_absoluto(float u, float v){
 *
 * @param pulsos[] Arreglo de estructuras de tipo pulso, donde guardar la información leida.
 * @param gates[] Arreglo de estructuras de tipo gate, donde guardar los promedios y modulos calculados.
+* @param num_pulsos Numero de pulsos en la estructura pulsos.
 */
 void
-promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[]){
-	float mean_v_q = 0, mean_v_i = 0, mean_h_q = 0, mean_h_i = 0;
+promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pulsos){
+	float valor_abs_v = 0, valor_abs_h = 0;
 	int medicion = 0, limite;
 
-	printf("Calculando valores promedio para cada gate...\n");
-	printf("Calculando valor absoluto de las mediciones promedio...\n");
+	printf("Calculando valor absoluto de las mediciones...\n");
+	printf("Promediando valores absolutos para cada gate...\n");
 
-	for (int i = 0; i < NUM_PULSOS_ARCHIVO; ++i)
+	for (int i = 0; i < num_pulsos; ++i)
+	//itera sobre los pulsos para repartir mediciones en cada gate
 	{
 		int resto = pulsos[i].valid_samples % NUM_GATES;
+		//calculo el resto de la division (cuantas muestras me sobran por gate)
 
 		for (int j = 0; j < NUM_GATES; j++)
-		//itera sobre un pulso llenando todas las gates
+		//en un pulso, reparte las mediciones por gate
 		{
 			if (j >= resto) limite = pulsos[i].valid_samples / NUM_GATES;
 			else 			limite = (pulsos[i].valid_samples / NUM_GATES) + 1;
+			//calcula cuantas mediciones le tocan al gate dado
 
 			for (int k = 0; k < limite; k++, medicion++)
+			//calcula el valor absoluto de las muestras para ese gate
+			//la variable medicion no se limpia para usarla en proximas iteraciones
+			//y recorrer todas las muestras del pulso
 			{
-				mean_v_i += pulsos[i].dato_v[medicion].lectura_i;
-				mean_v_q += pulsos[i].dato_v[medicion].lectura_q;
-				mean_h_i += pulsos[i].dato_h[medicion].lectura_i;
-				mean_h_q += pulsos[i].dato_h[medicion].lectura_q;
+				valor_abs_v += valor_absoluto(pulsos[i].dato_v[medicion].lectura_i, pulsos[i].dato_v[medicion].lectura_q);
+				valor_abs_h += valor_absoluto(pulsos[i].dato_h[medicion].lectura_i, pulsos[i].dato_h[medicion].lectura_q);
 			}
 
-			gates[j].absol_v[i] = valor_absoluto(mean_v_i/limite, mean_v_q/limite);
-			gates[j].absol_h[i] = valor_absoluto(mean_h_i/limite, mean_h_q/limite);
+			gates[j].absol_v[i] = valor_abs_v/limite;
+			gates[j].absol_h[i] = valor_abs_h/limite;
+			//promedio los valores absolutos
 
-			mean_v_i = 0;
-			mean_v_q = 0;
-			mean_h_i = 0;
-			mean_h_q = 0;
+			valor_abs_v = 0;
+			valor_abs_h = 0;
+			//limpio variables para la proxima iteracion
 		}
 		medicion = 0;
+		//si termine de recorrer un pulso, reinicio el indice medicion
+		//para comenzar a leer los primeros valores del pulso siguiente
 	}
 }
 
@@ -179,14 +188,15 @@ autocorrelacion(float vector[], int len, float resultado[]){
 *
 * @param gates[] Arreglo de estructuras de tipo gate, de donde saca el vector de modulos, y donde 
 * guarda la correlacion calculada.
+* @param num_pulsos Numero de pulsos en cada gate.
 */
 void
-calcular_autocorrelacion(struct Gate gates[]){
+calcular_autocorrelacion(struct Gate gates[], int num_pulsos){
 	printf("Calculando autocorrelacion de cada gate...\n");
 	for (int i = 0; i < NUM_GATES; ++i)
 	{
-		autocorrelacion(gates[i].absol_v, NUM_PULSOS_ARCHIVO, gates[i].vector_autocorr_v);
-		autocorrelacion(gates[i].absol_h, NUM_PULSOS_ARCHIVO,gates[i].vector_autocorr_h);
+		autocorrelacion(gates[i].absol_v, num_pulsos, gates[i].vector_autocorr_v);
+		autocorrelacion(gates[i].absol_h, num_pulsos, gates[i].vector_autocorr_h);
 	}
 }
 
@@ -213,17 +223,18 @@ calcular_autocorrelacion(struct Gate gates[]){
 *
 * @param gates[] Arreglo de estructuras de tipo gate, que contiene los resultados de la correlacion a guardar.
 * @param filename[] Nombre del archivo donde se quieren guardar los datos.
+* @param num_pulsos Numero de pulsos en cada gate.
 * @return 1 si hubo un error, 0 caso contrario.
 */
 int
-guardar_archivo(struct Gate gates[], char filename[]){
+guardar_archivo(struct Gate gates[], char filename[], int num_pulsos){
 	printf("Guardando resultados...\n");
 	FILE* f = fopen(filename,"wb");
 	if(!f){
 		printf("Error abriendo archivo para escritura\n");
 		return 1;
 	}
-	uint16_t nro_pulsos = NUM_PULSOS_ARCHIVO;
+	uint16_t nro_pulsos = num_pulsos;
 	uint16_t nro_gate = 0;
 	if(fwrite(&nro_pulsos, sizeof(uint16_t), 1, f) < 0){
 		printf("Error fwrite\n");
@@ -238,12 +249,12 @@ guardar_archivo(struct Gate gates[], char filename[]){
 			fclose(f);
 			return 1;
 		}
-		if(fwrite(gates[i].vector_autocorr_v, sizeof(float), NUM_PULSOS_ARCHIVO, f) < 0){
+		if(fwrite(gates[i].vector_autocorr_v, sizeof(float), num_pulsos, f) < 0){
 			printf("Error fwrite\n");
 			fclose(f);
 			return 1;
 		}
-		if(fwrite(gates[i].vector_autocorr_h, sizeof(float), NUM_PULSOS_ARCHIVO, f) < 0){
+		if(fwrite(gates[i].vector_autocorr_h, sizeof(float), num_pulsos, f) < 0){
 			printf("Error fwrite\n");
 			fclose(f);
 			return 1;

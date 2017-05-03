@@ -16,15 +16,16 @@ int main()
 {
 	struct Pulso pulsos[NUM_PULSOS_ARCHIVO];
 	struct Gate gates[NUM_GATES];
+	int cant_pulsos_archivo;
 
-	if(leer_archivo("pulsos.iq", pulsos) != 0){
+	if(leer_archivo("pulsos.iq", pulsos, &cant_pulsos_archivo) != 0){
 		printf("Error leer_archivo\n");
 		return 1;
 	}
 
-	promedio_y_valor_absoluto(pulsos, gates);
-	calcular_autocorrelacion(gates);
-	if(guardar_archivo(gates, "out.txt") != 0){
+	promedio_y_valor_absoluto(pulsos, gates, cant_pulsos_archivo);
+	calcular_autocorrelacion(gates, cant_pulsos_archivo);
+	if(guardar_archivo(gates, "out.txt", cant_pulsos_archivo) != 0){
 		printf("Error guardando archivo\n");
 		return 1;
 	}

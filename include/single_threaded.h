@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#define NUM_PULSOS_ARCHIVO 72
+#define NUM_PULSOS_ARCHIVO 75
 /*!< Numero de pulsos en el archivo a leer. */
 #define MAX_DATOS_LECTURA 5900
 /*!< Numero maximo de datos por pulso en el archivo a leer. */
@@ -45,9 +45,9 @@ struct Gate{
 y horizontal de las mediciones, de todos los pulsos, y los valores de autocorrelacion
 de los mismos.*/
 
-int leer_archivo(char file_name[], struct Pulso pulsos[NUM_PULSOS_ARCHIVO]);
+int leer_archivo(char file_name[], struct Pulso pulsos[], int* cant_pulsos);
 float valor_absoluto(float u, float v);
-void promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[]);
+void promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pulsos);
 void autocorrelacion(float vector[],int len, float resultado[]);
-void calcular_autocorrelacion(struct Gate gates[]);
-int guardar_archivo(struct Gate gates[], char filename[]);
+void calcular_autocorrelacion(struct Gate gates[], int num_pulsos);
+int guardar_archivo(struct Gate gates[], char filename[], int num_pulsos);
