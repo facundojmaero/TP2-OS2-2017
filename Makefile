@@ -5,18 +5,18 @@ LDIR=include
 SRCDIR=src
 BDIR=build
 PATHOBJECTS=$(addprefix $(ODIR)/,$(OBJECTS))
-OBJECTS=main_single_thread.o func_single_thread.o
+OBJECTS=single_threaded.o func_single_thread.o
 
-all: make_dirs main_single_thread
+all: make_dirs single_threaded
 
 make_dirs:
 	mkdir -p obj
 	mkdir -p build
 
-main_single_thread: $(OBJECTS)
+single_threaded: $(OBJECTS)
 	gcc $(PATHOBJECTS) -o $(BDIR)/$@ -lprofiler -lm
 
-main_single_thread.o: $(SRCDIR)/main_single_thread.c $(LDIR)/single_threaded.h
+single_threaded.o: $(SRCDIR)/single_threaded.c $(LDIR)/single_threaded.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@
 
 func_single_thread.o: $(SRCDIR)/func_single_thread.c

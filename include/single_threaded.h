@@ -13,6 +13,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_DATOS_LECTURA 5900
 /*!< Numero maximo de datos por pulso en el archivo a leer. */

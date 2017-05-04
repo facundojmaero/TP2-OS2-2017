@@ -27,7 +27,7 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 	}
 
 	*size_bytes = ftell(ptr);
-	printf("Tamaño del archivo %s en bytes: %d\n",file_name, *size_bytes);
+	printf("Tamaño del archivo '%s': %d bytes\n",file_name, *size_bytes);
 
 	if(fseek(ptr,0,SEEK_SET) != 0){
 		printf("Error seeking file\n");
@@ -48,7 +48,7 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 	}
 	
 	fclose(ptr);
-	printf("El archivo contiene informacion de %d pulsos.\n", *num_pulso);
+	printf("Se encontró informacion de %d pulsos.\n", *num_pulso);
 	return 0;
 }
 
@@ -72,7 +72,7 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int len_file){
 	float lectura[4*MAX_DATOS_LECTURA];
 	int num_pulso=0;
 
-	printf("Leyendo archivo '%s'...\n", file_name);
+	printf("Leyendo informacion...\n");
 
 	ptr=fopen(file_name,"rb");
 	if (!ptr) {
@@ -109,7 +109,6 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int len_file){
 	}
 	
 	fclose(ptr);
-	printf("Lectura terminada.\n");
 	return 0;
 }
 
@@ -293,4 +292,64 @@ guardar_archivo(struct Gate gates[], char filename[], int num_pulsos){
 
 	fclose(f);
 	return 0;
+}
+
+/**
+* @brief Wrapper de la syscall malloc con control del valor de retorno.
+*
+* Funcion wrapper que verifica el return value de malloc, y si es NULL, 
+* avisa al usuario y finaliza la ejecucion del programa.
+*
+* @param n Cantidad de memoria a reservar.
+* @return p Puntero a la direccion de memoria reservada.
+*/
+void *safe_malloc(size_t n)
+{
+    void *p = malloc(n);
+    if (p == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", n);
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
+
+/**
+* @brief Inicializa los campos de la estructura de tipo Gate para alojar los pulsos leidos.
+*
+* Realiza el malloc de los elementos del arreglo gates.
+* Si se quisiera leer un archivo donde no se sabe la cantidad de pulsos ahi contenidos,
+* es necesario asignar memoria de manera dinamica.
+* Esta reserva de memoria depende de la cantidad de pulsos, y se realiza mediante el
+* wrapper safe_malloc, que verifica la correcta ejecucion de la syscall malloc().
+*
+* @param gates[] Arreglo de estructuras de tipo gate, con punteros sin inicializar.
+* @param cant_pulsos_archivo Cantidad de pulsos leida en el archivo, para reservar memoria.
+*/
+void
+initialize_gates(struct Gate gates[], int cant_pulsos_archivo){
+	for (int i = 0; i < NUM_GATES; ++i)
+	{
+		gates[i].absol_v = safe_malloc(sizeof(float) * cant_pulsos_archivo);
+		gates[i].absol_h = safe_malloc(sizeof(float) * cant_pulsos_archivo);
+		gates[i].vector_autocorr_v = safe_malloc(sizeof(float) * cant_pulsos_archivo);
+		gates[i].vector_autocorr_h = safe_malloc(sizeof(float) * cant_pulsos_archivo);
+	}
+}
+
+/**
+* @brief Libera la memoria reservada previamente para los valores absolutos de las mediciones.
+*
+* Libera la porcion de memoria reservada por el arreglo de struct Gate, para guardar
+* los valores absolutos de las mediciones, ya que no se necesitan mas.
+*
+* @param gates[] Arreglo de estructuras de tipo gate, con los datos a liberar.
+*/
+void
+free_absolute_values_gates(struct Gate gates[]){
+	for (int i = 0; i < NUM_GATES; ++i)
+	{
+		free(gates[i].absol_v);
+		free(gates[i].absol_h);
+	}
 }
