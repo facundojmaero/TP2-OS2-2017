@@ -23,16 +23,18 @@ Los siguientes son los comandos útiles para el uso de la aplicación:
 
 ```$ make cppcheck```     --> Ejecuta el programa CppCheck sobre el proyecto. (Debe estar instalado).
 
-```$ ./main_single_thread```   --> Ejecuta el programa en su versión single threaded.
+```$ ./single_threaded```   --> Ejecuta el programa en su versión single threaded.
 
-```$ ./main_multithread```   --> Ejecuta el programa en su versión multithreaded.
+```$ ./multithreaded```   --> Ejecuta el programa en su versión multithreaded.
 
 ## 3. Ejecución
 --- 
 Para ejecutar el programa monothread, utilizar el comando 
-```$ ./main_single_thread```
+```$ ./single_threaded```
  Para ejecutar el programa ejecutado en paralelo, utilizar el comando
- ```$ ./main_multithread```
+ ```$ ./multithreaded```
+
+Es posible además ejecutar los programas midiendo el tiempo que demora su ejecución, con la opción ```-t```.
 
  En el informe del trabajo se incluyen gráficos y estadísticas obtenidas de la ejecución del software en la notebook del alumno, y el clúster de la Facultad.
 
