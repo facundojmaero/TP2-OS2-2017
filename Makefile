@@ -14,7 +14,7 @@ make_dirs:
 	mkdir -p build
 
 main_single_thread: $(OBJECTS)
-	gcc $(PATHOBJECTS) -o $(BDIR)/$@ -lm
+	gcc $(PATHOBJECTS) -o $(BDIR)/$@ -lprofiler -lm
 
 main_single_thread.o: $(SRCDIR)/main_single_thread.c $(LDIR)/single_threaded.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@

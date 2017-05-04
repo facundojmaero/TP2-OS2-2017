@@ -8,26 +8,11 @@
  */
 #include "../include/single_threaded.h"
 
-/**
-* @brief Lee el archivo binario "pulsos.iq" y guarda su contenido en una estructura.
-*
-* Lee el archivo binario con la salida del ADC del radar, interpreta su contenido y
-* lo guarda en un arreglo de pulsos. Cada pulso es una estructura que aloja las lecturas
-* de la componente horizontal y vertidal del pulso, y el número de lecturas realizadas.
-*
-* @param file_name[] El nombre del archivo a leer
-* @param pulsos[] Arreglo de estructuras de tipo pulso, donde guardar la información leida.
-* @param cant_pulsos Puntero a variable para devolver la cantidad de pulsos leida.
-* @return 1 si hubo un error, 0 caso contrario.
-*/
 int
-leer_archivo(char file_name[], struct Pulso pulsos[], int* cant_pulsos){
+leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 	FILE *ptr;
-	uint16_t valid_samples;
-	float muestra[2];
-	int num_pulso=0;
-
-	printf("Leyendo archivo '%s'...\n", file_name);
+	uint16_t valid_samples = 0;
+	*num_pulso = 0;
 
 	ptr=fopen(file_name,"rb");
 	if (!ptr) {
@@ -41,43 +26,89 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int* cant_pulsos){
 		return 1;
 	}
 
-	int len_file = ftell(ptr);
-	// printf("Tamaño en bytes: %d\n", len_file);
+	*size_bytes = ftell(ptr);
+	printf("Tamaño del archivo %s en bytes: %d\n",file_name, *size_bytes);
 
 	if(fseek(ptr,0,SEEK_SET) != 0){
 		printf("Error seeking file\n");
 		fclose(ptr);
 		return 1;
 	}
+	
+	while(ftell(ptr) != *size_bytes){
+		if(fread(&valid_samples, sizeof(uint16_t), 1, ptr) != 1){
+			printf("Error fread\n");
+		}
+		if(fseek(ptr,valid_samples*4*sizeof(float),SEEK_CUR) != 0){
+			printf("Error seeking file\n");
+			fclose(ptr);
+			return 1;
+		}
+		(*num_pulso)++;
+	}
+	
+	fclose(ptr);
+	printf("El archivo contiene informacion de %d pulsos.\n", *num_pulso);
+	return 0;
+}
 
+
+/**
+* @brief Lee el archivo binario "pulsos.iq" y guarda su contenido en una estructura.
+*
+* Lee el archivo binario con la salida del ADC del radar, interpreta su contenido y
+* lo guarda en un arreglo de pulsos. Cada pulso es una estructura que aloja las lecturas
+* de la componente horizontal y vertidal del pulso, y el número de lecturas realizadas.
+*
+* @param file_name[] El nombre del archivo a leer
+* @param pulsos[] Arreglo de estructuras de tipo pulso, donde guardar la información leida.
+* @param cant_pulsos Puntero a variable para devolver la cantidad de pulsos leida.
+* @return 1 si hubo un error, 0 caso contrario.
+*/
+int
+leer_archivo(char file_name[], struct Pulso pulsos[], int len_file){
+	FILE *ptr;
+	uint16_t valid_samples = 0;
+	float lectura[4*MAX_DATOS_LECTURA];
+	int num_pulso=0;
+
+	printf("Leyendo archivo '%s'...\n", file_name);
+
+	ptr=fopen(file_name,"rb");
+	if (!ptr) {
+		printf("Unable to open file!\n");
+		return 1;
+	}
+	
 	while(ftell(ptr) != len_file){
 
 		if(fread(&valid_samples, sizeof(uint16_t), 1, ptr) != 1){
 			printf("Error fread\n");
 		}
-		// printf("%d - Tamaño: %d\n",num_pulso, valid_samples);
+
 		pulsos[num_pulso].valid_samples = valid_samples;
-		int j = 0;
-		for (int i = 0; i < 2*valid_samples; ++i)
+		int j=0;
+		//lee 1 pulso (1 tabla)
+		if(fread(&lectura, sizeof(float), 4*valid_samples, ptr) != 4*valid_samples){
+			printf("Error fread\n");
+		}
+		for (int i = 0; i < 4*valid_samples; ++i)
 		{
-			if(fread(&muestra, sizeof(float), 2, ptr) != 2){
-				printf("Error fread\n");
-			}
-			if(i<valid_samples){
-				pulsos[num_pulso].dato_v[j].lectura_i = muestra[0];
-				pulsos[num_pulso].dato_v[j].lectura_q = muestra[1];
+			if(i<2*valid_samples){
+				pulsos[num_pulso].dato_v[j].lectura_i = lectura[i];
+				pulsos[num_pulso].dato_v[j].lectura_q = lectura[++i];
 			}
 			else{
-				pulsos[num_pulso].dato_h[j].lectura_i = muestra[0];
-				pulsos[num_pulso].dato_h[j].lectura_q = muestra[1];	
+				pulsos[num_pulso].dato_h[j].lectura_i = lectura[i];
+				pulsos[num_pulso].dato_h[j].lectura_q = lectura[++i];
 			}
 			j = (j+1)%valid_samples;
 		}
 		num_pulso++;
+
 	}
 	
 	fclose(ptr);
-	*cant_pulsos = num_pulso;
 	printf("Lectura terminada.\n");
 	return 0;
 }
@@ -94,8 +125,7 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int* cant_pulsos){
 */
 float
 valor_absoluto(float u, float v){
-	float result = sqrt(pow(u,2) + pow(v,2));
-	return result;
+	return sqrt(pow(u,2) + pow(v,2));
 }
 
 /**
