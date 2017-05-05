@@ -34,7 +34,8 @@ Para ejecutar el programa monothread, utilizar el comando
  Para ejecutar el programa ejecutado en paralelo, utilizar el comando
  ```$ ./multithreaded```
 
-Es posible además ejecutar los programas midiendo el tiempo que demora su ejecución, con la opción ```-t```.
+Es posible además especificar el número de hilos para la versión multithreaded, hasta un máximo de 200, ingresando el valor deseado al ejecutar el binario.
+Por defecto se ejecuta utilizando 4 hilos.
 
  En el informe del trabajo se incluyen gráficos y estadísticas obtenidas de la ejecución del software en la notebook del alumno, y el clúster de la Facultad.
 

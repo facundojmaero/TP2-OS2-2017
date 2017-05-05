@@ -6,7 +6,7 @@
  *
  *  @author Facundo Maero
  */
-#include "../include/single_threaded.h"
+#include "../include/multithreaded.h"
 
 int
 leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
@@ -92,17 +92,27 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int len_file){
 		if(fread(&lectura, sizeof(float), 4*valid_samples, ptr) != 4*valid_samples){
 			printf("Error fread\n");
 		}
-		for (int i = 0; i < 4*valid_samples; ++i)
+
+		#pragma omp parallel sections
 		{
-			if(i<2*valid_samples){
-				pulsos[num_pulso].dato_v[j].lectura_i = lectura[i];
-				pulsos[num_pulso].dato_v[j].lectura_q = lectura[++i];
+			#pragma omp section
+			{	
+				for (int i = 0; i < 2*valid_samples; ++i)
+				{
+					pulsos[num_pulso].dato_v[j].lectura_i = lectura[i];
+					pulsos[num_pulso].dato_v[j].lectura_q = lectura[++i];
+					j = (j+1)%valid_samples;
+				}
 			}
-			else{
-				pulsos[num_pulso].dato_h[j].lectura_i = lectura[i];
-				pulsos[num_pulso].dato_h[j].lectura_q = lectura[++i];
+			#pragma omp section
+			{
+				for (int i = 2*valid_samples; i < 4*valid_samples; ++i)
+				{
+					pulsos[num_pulso].dato_h[j].lectura_i = lectura[i];
+					pulsos[num_pulso].dato_h[j].lectura_q = lectura[++i];
+					j = (j+1)%valid_samples;
+				}
 			}
-			j = (j+1)%valid_samples;
 		}
 		num_pulso++;
 
@@ -145,6 +155,7 @@ promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pu
 
 	printf("Calculando valor absoluto y promedio de las mediciones...\n");
 
+	#pragma omp parallel for default(none) shared(num_pulsos, gates, pulsos) private(limite, medicion, valor_abs_v, valor_abs_h)
 	for (int i = 0; i < num_pulsos; ++i)
 	//itera sobre los pulsos para repartir mediciones en cada gate
 	{
@@ -158,13 +169,14 @@ promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pu
 			else 			limite = (pulsos[i].valid_samples / NUM_GATES) + 1;
 			//calcula cuantas mediciones le tocan al gate dado
 
-			for (int k = 0; k < limite; k++, medicion++)
+			for (int k = 0; k < limite; k++)
 			//calcula el valor absoluto de las muestras para ese gate
 			//la variable medicion no se limpia para usarla en proximas iteraciones
 			//y recorrer todas las muestras del pulso
 			{
 				valor_abs_v += valor_absoluto(pulsos[i].dato_v[medicion].lectura_i, pulsos[i].dato_v[medicion].lectura_q);
 				valor_abs_h += valor_absoluto(pulsos[i].dato_h[medicion].lectura_i, pulsos[i].dato_h[medicion].lectura_q);
+				medicion++;
 			}
 
 			gates[j].absol_v[i] = valor_abs_v/limite;
@@ -178,7 +190,7 @@ promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pu
 		medicion = 0;
 		//si termine de recorrer un pulso, reinicio el indice medicion
 		//para comenzar a leer los primeros valores del pulso siguiente
-	}
+	}	
 }
 
 /**
@@ -197,6 +209,7 @@ promedio_y_valor_absoluto(struct Pulso pulsos[], struct Gate gates[], int num_pu
 */
 void
 autocorrelacion(float vector[], int len, float resultado[]){
+	#pragma omp parallel for default(none) shared(len, resultado, vector)
 	for (int i = 0; i < len; ++i)
 	{
 		float suma = 0;
@@ -221,8 +234,10 @@ autocorrelacion(float vector[], int len, float resultado[]){
 void
 calcular_autocorrelacion(struct Gate gates[], int num_pulsos){
 	printf("Calculando autocorrelacion de cada gate...\n");
+	
+	#pragma omp parallel for default(none) shared(num_pulsos, gates)
 	for (int i = 0; i < NUM_GATES; ++i)
-	{
+	{	
 		autocorrelacion(gates[i].absol_v, num_pulsos, gates[i].vector_autocorr_v);
 		autocorrelacion(gates[i].absol_h, num_pulsos, gates[i].vector_autocorr_h);
 	}
@@ -327,6 +342,7 @@ void *safe_malloc(size_t n)
 */
 void
 initialize_gates(struct Gate gates[], int cant_pulsos_archivo){
+	#pragma omp parallel for default(none) shared(cant_pulsos_archivo, gates)
 	for (int i = 0; i < NUM_GATES; ++i)
 	{
 		gates[i].absol_v = safe_malloc(sizeof(float) * cant_pulsos_archivo);
@@ -346,6 +362,7 @@ initialize_gates(struct Gate gates[], int cant_pulsos_archivo){
 */
 void
 free_absolute_values_gates(struct Gate gates[]){
+	#pragma omp parallel for default(none) shared(gates)
 	for (int i = 0; i < NUM_GATES; ++i)
 	{
 		free(gates[i].absol_v);
