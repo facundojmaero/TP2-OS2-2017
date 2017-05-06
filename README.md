@@ -31,8 +31,8 @@ Los siguientes son los comandos útiles para el uso de la aplicación:
 --- 
 Para ejecutar el programa monothread, utilizar el comando 
 ```$ ./build/ingle_threaded```
- Para ejecutar el programa ejecutado en paralelo, utilizar el comando
- ```$ ./build/multithreaded```
+Para ejecutar el programa ejecutado en paralelo, utilizar el comando
+```$ ./build/multithreaded```
 
 Pueden ingresarse opciones al ejecutar los binarios. Estas opciones son:
 
@@ -42,8 +42,8 @@ Pueden ingresarse opciones al ejecutar los binarios. Estas opciones son:
 
 Ejemplos:
 
- - ```./build/single_threaded -t -s```
- - ```./build/multithreaded 8 -s```
+ - ```$ ./build/single_threaded -t -s```
+ - ```$ ./build/multithreaded 8 -s```
 
 En el informe del trabajo se incluyen gráficos y estadísticas obtenidas de la ejecución del software en la notebook del alumno, y el clúster de la Facultad.
 
@@ -73,7 +73,9 @@ Para usar el profiler ejecutar el comando:
 ```$ valgrind --tool=callgrind <binario> <argumentos> ```
 
 Ejemplos:
+
 ```$ valgrind --tool=callgrind ./build/single_threaded```
+
 ```$ valgrind --tool=callgrind ./build/multithreaded 4```
 
 Luego, para visualizar los resultados de la ejecución, puede usarse un programa como **KCachegrind**, con el comando:
@@ -81,4 +83,5 @@ Luego, para visualizar los resultados de la ejecución, puede usarse un programa
 ```$ kcachegrind callgrind.out.PID ```
 
 Ejemplo:
+
 ```$ kcachegrind callgrind.out.15500 ```
