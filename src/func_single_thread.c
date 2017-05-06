@@ -8,6 +8,18 @@
  */
 #include "../include/single_threaded.h"
 
+/**
+* @brief Lee del archivo el numero de pulsos que contiene, para acelerar el procesamiento.
+*
+* Lee el archivo binario, y cuenta el numero de pulsos que contiene, solo leyendo
+* el dato valid_samples de cada tabla de pulso. Además, lee el tamaño total del
+* archivo.
+*
+* @param file_name[] El nombre del archivo a leer
+* @param num_pulso Puntero para retornar el número de pulsos leídos.
+* @param size_bytes Puntero para retornar el tamaño del archivo en bytes.
+* @return 1 si hubo un error, 0 caso contrario.
+*/
 int
 leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 	FILE *ptr;
@@ -16,31 +28,31 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 
 	ptr=fopen(file_name,"rb");
 	if (!ptr) {
-		printf("Unable to open file!\n");
+		printf(BOLDRED"Unable to open file!\n"RESET);
 		return 1;
 	}
 
 	if(fseek(ptr,0,SEEK_END) != 0){
-		printf("Error seeking file\n");
+		printf(BOLDRED"Error seeking file\n"RESET);
 		fclose(ptr);
 		return 1;
 	}
 
 	*size_bytes = ftell(ptr);
-	printf("Tamaño del archivo '%s': %d bytes\n",file_name, *size_bytes);
+	printf("Tamaño del archivo "BOLDGREEN"'%s'"RESET": "BOLDGREEN"%d"RESET" bytes\n",file_name, *size_bytes);
 
 	if(fseek(ptr,0,SEEK_SET) != 0){
-		printf("Error seeking file\n");
+		printf(BOLDRED"Error seeking file\n"RESET);
 		fclose(ptr);
 		return 1;
 	}
 	
 	while(ftell(ptr) != *size_bytes){
 		if(fread(&valid_samples, sizeof(uint16_t), 1, ptr) != 1){
-			printf("Error fread\n");
+			printf(BOLDRED"Error fread\n"RESET);
 		}
 		if(fseek(ptr,valid_samples*4*sizeof(float),SEEK_CUR) != 0){
-			printf("Error seeking file\n");
+			printf(BOLDRED"Error seeking file\n"RESET);
 			fclose(ptr);
 			return 1;
 		}
@@ -48,10 +60,9 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 	}
 	
 	fclose(ptr);
-	printf("Se encontró informacion de %d pulsos.\n", *num_pulso);
+	printf("Se encontró informacion de "BOLDGREEN"%d"RESET" pulsos.\n", *num_pulso);
 	return 0;
 }
-
 
 /**
 * @brief Lee el archivo binario "pulsos.iq" y guarda su contenido en una estructura.
@@ -62,7 +73,7 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 *
 * @param file_name[] El nombre del archivo a leer
 * @param pulsos[] Arreglo de estructuras de tipo pulso, donde guardar la información leida.
-* @param cant_pulsos Puntero a variable para devolver la cantidad de pulsos leida.
+* @param len_file Longitud del archivo en bytes, valor ya conocido.
 * @return 1 si hubo un error, 0 caso contrario.
 */
 int
@@ -76,21 +87,21 @@ leer_archivo(char file_name[], struct Pulso pulsos[], int len_file){
 
 	ptr=fopen(file_name,"rb");
 	if (!ptr) {
-		printf("Unable to open file!\n");
+		printf(BOLDRED"Unable to open file!\n"RESET);
 		return 1;
 	}
 	
 	while(ftell(ptr) != len_file){
 
 		if(fread(&valid_samples, sizeof(uint16_t), 1, ptr) != 1){
-			printf("Error fread\n");
+			printf(BOLDRED"Error fread\n"RESET);
 		}
 
 		pulsos[num_pulso].valid_samples = valid_samples;
 		int j=0;
 		//lee 1 pulso (1 tabla)
 		if(fread(&lectura, sizeof(float), 4*valid_samples, ptr) != 4*valid_samples){
-			printf("Error fread\n");
+			printf(BOLDRED"Error fread\n"RESET);
 		}
 		for (int i = 0; i < 4*valid_samples; ++i)
 		{
@@ -214,8 +225,7 @@ autocorrelacion(float vector[], int len, float resultado[]){
 *
 * Calcula la autocorrelacion de cada vector columna gate, y guarda en ese gate el vector resultado.
 *
-* @param gates[] Arreglo de estructuras de tipo gate, de donde saca el vector de modulos, y donde 
-* guarda la correlacion calculada.
+* @param gates[] Arreglo gates, de donde saca el vector de modulos, y donde guarda la correlacion calculada.
 * @param num_pulsos Numero de pulsos en cada gate.
 */
 void
@@ -259,13 +269,13 @@ guardar_archivo(struct Gate gates[], char filename[], int num_pulsos){
 	printf("Guardando resultados...\n");
 	FILE* f = fopen(filename,"wb");
 	if(!f){
-		printf("Error abriendo archivo para escritura\n");
+		printf(BOLDRED"Error abriendo archivo para escritura\n"RESET);
 		return 1;
 	}
 	uint16_t nro_pulsos = num_pulsos;
 	uint16_t nro_gate = 0;
 	if(fwrite(&nro_pulsos, sizeof(uint16_t), 1, f) < 0){
-		printf("Error fwrite\n");
+		printf(BOLDRED"Error fwrite\n"RESET);
 		fclose(f);
 		return 1;
 	}
@@ -273,17 +283,17 @@ guardar_archivo(struct Gate gates[], char filename[], int num_pulsos){
 	for (int i = 0; i < NUM_GATES; ++i, nro_gate++)
 	{
 		if(fwrite(&nro_gate, sizeof(uint16_t), 1, f) < 0){
-			printf("Error fwrite\n");
+			printf(BOLDRED"Error fwrite\n"RESET);
 			fclose(f);
 			return 1;
 		}
 		if(fwrite(gates[i].vector_autocorr_v, sizeof(float), num_pulsos, f) < 0){
-			printf("Error fwrite\n");
+			printf(BOLDRED"Error fwrite\n"RESET);
 			fclose(f);
 			return 1;
 		}
 		if(fwrite(gates[i].vector_autocorr_h, sizeof(float), num_pulsos, f) < 0){
-			printf("Error fwrite\n");
+			printf(BOLDRED"Error fwrite\n"RESET);
 			fclose(f);
 			return 1;
 		}
@@ -350,5 +360,60 @@ free_absolute_values_gates(struct Gate gates[]){
 	{
 		free(gates[i].absol_v);
 		free(gates[i].absol_h);
+	}
+}
+
+/**
+* @brief Guarda en un archivo de texto el tiempo de ejecucion.
+*
+* @param execution_time Tiempo de ejecucion [s]
+* @param filename[] Nombre del archivo a guardar los datos.
+* @return 1 si hubo un error, 0 caso contrario.
+*/
+int
+save_time_to_file(double execution_time, char filename[]){
+	FILE* f = fopen(filename,"a");
+	if(!f){
+		printf(BOLDRED"Error abriendo archivo para escritura\n"RESET);
+		return 1;
+	}
+	if(fprintf(f, "%f\n", execution_time) < 0){
+		printf(BOLDRED"Error fwrite\n"RESET);
+		fclose(f);
+		return 1;
+	}
+	fclose(f);
+	return 0;
+}
+
+/**
+* @brief Procesa los argumentos con los que se llamó el programa y setea los flags acorde a ello.
+*
+* Evalúa en un bucle los argumentos.
+* Los valores aceptados son:
+* * -t Muestra por salida standard el tiempo de ejecución.
+* * -s Guarda en un archivo de texto el número de hilos utilizado y el tiempo.
+* Si el argumento no existe, se informa del error.
+*
+* @param argc Numero de argumentos con que se llamó el programa.
+* @param argv Argumentos con los que se llamó el programa.
+* @param time_flag Puntero al flag de mostrar tiempo, para modificarlo si es necesario.
+* @param save_flag Puntero al flag de guardar el tiempo, para modificarlo si es necesario.
+*/
+void
+process_arguments(int argc, char *argv[], int* time_flag, int* save_flag){
+	if(argc > 1){
+		for (int i = 1; i < argc; ++i)
+		{
+			if(strcmp(argv[i],"-t") == 0){
+				*time_flag = 1;
+			}
+			else if(strcmp(argv[i],"-s") == 0){
+				*save_flag = 1;
+			}
+			else{
+				printf("No se reconoce el comando "BOLDRED"%s\n"RESET, argv[i]);
+			}
+		}
 	}
 }

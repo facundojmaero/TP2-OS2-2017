@@ -23,12 +23,16 @@
 * 	"make"					--> Compila el proyecto y genera ejecutable.
 * 	"make clean"			--> Limpia para una nueva compilación.
 * 	"make cppcheck" 		--> Ejecuta el programa CppCheck sobre el proyecto. (Debe estar instalado).
-* 	"./main_single_thread"	--> Ejecuta el programa en su versión single threaded.
-* 	"./main_multithread"	--> Ejecuta el programa en su versión multithreaded.
+* 	"./single_threaded"		--> Ejecuta el programa en su versión single threaded.
+* 	"./multithreaded"		--> Ejecuta el programa en su versión multithreaded.
 *
 * @par EJECUCIÓN:
-* Para ejecutar el programa monothread, utilizar el comando "./main_single_thread"
-* Para ejecutar el programa ejecutado en paralelo, utilizar el comando "./main_multithread"
+* Para ejecutar el programa monothread, utilizar el comando "./single_threaded"
+* Para ejecutar el programa ejecutado en paralelo, utilizar el comando "./multithreaded"
+* Opciones que aceptan los binarios: 
+* --> -t Muestra por la salida standard el tiempo de ejecución del código.
+* --> -s Guarda en un archivo de texto el tiempo de ejecución del código.
+* --> <numero_de_hilos> En el caso del programa distribuído, lo ejecuta con el número de hilos ingresado.
 * En el informe del trabajo se incluyen gráficos y estadísticas obtenidas de la ejecución 
 * del software en la notebook del alumno, y el clúster de la Facultad.
 *

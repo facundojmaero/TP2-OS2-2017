@@ -19,19 +19,19 @@ make_dirs:
 single_threaded: $(OBJECTS_SINGLE_THREADED)
 	gcc $(PATHOBJECTS_SINGLE_THREADED) -o $(BDIR)/$@ -lm
 
-single_threaded.o: $(SRCDIR)/single_threaded.c $(LDIR)/single_threaded.h
+single_threaded.o: $(SRCDIR)/single_threaded.c $(LDIR)/colors.h $(LDIR)/single_threaded.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@
 
-func_single_thread.o: $(SRCDIR)/func_single_thread.c
+func_single_thread.o: $(SRCDIR)/func_single_thread.c $(LDIR)/colors.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@
 
 multithreaded: $(OBJECTS_MULTITHREADED)
 	gcc $(PATHOBJECTS_MULTITHREADED) -o $(BDIR)/$@ -lm $(PARFLAGS)
 
-multithreaded.o: $(SRCDIR)/multithreaded.c $(LDIR)/multithreaded.h
+multithreaded.o: $(SRCDIR)/multithreaded.c $(LDIR)/colors.h $(LDIR)/multithreaded.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@ $(PARFLAGS)
 
-func_multithreaded.o: $(SRCDIR)/func_multithreaded.c
+func_multithreaded.o: $(SRCDIR)/func_multithreaded.c $(LDIR)/colors.h
 	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@ $(PARFLAGS)
 
 cppcheck:
