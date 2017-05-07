@@ -1,0 +1,9 @@
+var searchData=
+[
+  ['lectura',['Lectura',['../struct_lectura.html',1,'']]],
+  ['lectura_5fi',['lectura_i',['../struct_lectura.html#a57dd4392470b8582d26ed2151beeb78a',1,'Lectura']]],
+  ['lectura_5fq',['lectura_q',['../struct_lectura.html#a7d3cdbeecc19ba48cce5a3c098e1762e',1,'Lectura']]],
+  ['leer_2ec',['Leer.c',['../_leer_8c.html',1,'']]],
+  ['leer_5farchivo',['leer_archivo',['../multithreaded_8h.html#a71c44a78f10e6239113d7dd20e9429b2',1,'leer_archivo(char file_name[], struct Pulso pulsos[], int len_file):&#160;func_multithreaded.c'],['../single__threaded_8h.html#a71c44a78f10e6239113d7dd20e9429b2',1,'leer_archivo(char file_name[], struct Pulso pulsos[], int len_file):&#160;func_multithreaded.c'],['../func__multithreaded_8c.html#a71c44a78f10e6239113d7dd20e9429b2',1,'leer_archivo(char file_name[], struct Pulso pulsos[], int len_file):&#160;func_multithreaded.c'],['../func__single__thread_8c.html#a71c44a78f10e6239113d7dd20e9429b2',1,'leer_archivo(char file_name[], struct Pulso pulsos[], int len_file):&#160;func_single_thread.c']]],
+  ['leer_5fnumero_5fpulsos_5farchivo',['leer_numero_pulsos_archivo',['../multithreaded_8h.html#ae41842c06489bd9e690a8e7bfe497d80',1,'leer_numero_pulsos_archivo(char file_name[], int *num_pulso, int *size_bytes):&#160;func_multithreaded.c'],['../single__threaded_8h.html#ae41842c06489bd9e690a8e7bfe497d80',1,'leer_numero_pulsos_archivo(char file_name[], int *num_pulso, int *size_bytes):&#160;func_multithreaded.c'],['../func__multithreaded_8c.html#ae41842c06489bd9e690a8e7bfe497d80',1,'leer_numero_pulsos_archivo(char file_name[], int *num_pulso, int *size_bytes):&#160;func_multithreaded.c'],['../func__single__thread_8c.html#ae41842c06489bd9e690a8e7bfe497d80',1,'leer_numero_pulsos_archivo(char file_name[], int *num_pulso, int *size_bytes):&#160;func_single_thread.c']]]
+];

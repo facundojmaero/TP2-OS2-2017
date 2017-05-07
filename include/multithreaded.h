@@ -1,5 +1,5 @@
-/** @file single_threaded.h
- *  @brief Libreria de la ejecución monothread
+/** @file multithreaded.h
+ *  @brief Libreria de la ejecución multithread.
  *
  *  Libreria del programa monothread, constantes, estructuras y prototipos de
  *  funciones.
