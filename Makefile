@@ -10,29 +10,29 @@ OBJECTS_SINGLE_THREADED=single_threaded.o func_single_thread.o
 PATHOBJECTS_MULTITHREADED=$(addprefix $(ODIR)/,$(OBJECTS_MULTITHREADED))
 OBJECTS_MULTITHREADED=multithreaded.o func_multithreaded.o
 
-all: make_dirs single_threaded multithreaded
+all: make_dirs build/single_threaded build/multithreaded
 
 make_dirs:
 	mkdir -p obj
 	mkdir -p build
 
-single_threaded: $(OBJECTS_SINGLE_THREADED)
-	gcc $(PATHOBJECTS_SINGLE_THREADED) -o $(BDIR)/$@ -lm
+build/single_threaded: $(PATHOBJECTS_SINGLE_THREADED)
+	gcc $(PATHOBJECTS_SINGLE_THREADED) -o $@ -lm
 
-single_threaded.o: $(SRCDIR)/single_threaded.c $(LDIR)/colors.h $(LDIR)/single_threaded.h
-	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@
+obj/single_threaded.o: $(SRCDIR)/single_threaded.c $(LDIR)/colors.h $(LDIR)/single_threaded.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
-func_single_thread.o: $(SRCDIR)/func_single_thread.c $(LDIR)/colors.h
-	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@
+obj/func_single_thread.o: $(SRCDIR)/func_single_thread.c $(LDIR)/colors.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
-multithreaded: $(OBJECTS_MULTITHREADED)
-	gcc $(PATHOBJECTS_MULTITHREADED) -o $(BDIR)/$@ -lm $(PARFLAGS)
+build/multithreaded: $(PATHOBJECTS_MULTITHREADED)
+	gcc $(PATHOBJECTS_MULTITHREADED) -o $@ -lm $(PARFLAGS)
 
-multithreaded.o: $(SRCDIR)/multithreaded.c $(LDIR)/colors.h $(LDIR)/multithreaded.h
-	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@ $(PARFLAGS)
+obj/multithreaded.o: $(SRCDIR)/multithreaded.c $(LDIR)/colors.h $(LDIR)/multithreaded.h
+	$(CC) $(CFLAGS) -c $< -o $@ $(PARFLAGS)
 
-func_multithreaded.o: $(SRCDIR)/func_multithreaded.c $(LDIR)/colors.h
-	$(CC) $(CFLAGS) -c $< -o $(ODIR)/$@ $(PARFLAGS)
+obj/func_multithreaded.o: $(SRCDIR)/func_multithreaded.c $(LDIR)/colors.h
+	$(CC) $(CFLAGS) -c $< -o $@ $(PARFLAGS)
 
 cppcheck:
 	@echo
