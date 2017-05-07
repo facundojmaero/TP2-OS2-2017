@@ -7,6 +7,7 @@
  *  @author Facundo Maero
  */
 #include "../include/multithreaded.h"
+#include <sys/stat.h>
 
 /**
 * @brief Lee del archivo el numero de pulsos que contiene, para acelerar el procesamiento.
@@ -32,20 +33,26 @@ leer_numero_pulsos_archivo(char file_name[], int* num_pulso, int* size_bytes){
 		return 1;
 	}
 
-	if(fseek(ptr,0,SEEK_END) != 0){
-		printf(BOLDRED"Error seeking file\n"RESET);
-		fclose(ptr);
-		return 1;
-	}
+	struct stat st;
+    // stat(file_name, &st)
+    fstat(fileno(ptr), &st);;
+    printf("Tamaño del archivo "BOLDGREEN"'%s': %ld"RESET" bytes\n",file_name, st.st_size);
+    *size_bytes = st.st_size;
 
-	*size_bytes = ftell(ptr);
-	printf("Tamaño del archivo "BOLDGREEN"'%s': %d"RESET" bytes\n",file_name, *size_bytes);
+	// if(fseek(ptr,0,SEEK_END) != 0){
+	// 	printf(BOLDRED"Error seeking file\n"RESET);
+	// 	fclose(ptr);
+	// 	return 1;
+	// }
 
-	if(fseek(ptr,0,SEEK_SET) != 0){
-		printf(BOLDRED"Error seeking file\n"RESET);
-		fclose(ptr);
-		return 1;
-	}
+	// *size_bytes = ftell(ptr);
+	// printf("Tamaño del archivo "BOLDGREEN"'%s': %d"RESET" bytes\n",file_name, *size_bytes);
+
+	// if(fseek(ptr,0,SEEK_SET) != 0){
+	// 	printf(BOLDRED"Error seeking file\n"RESET);
+	// 	fclose(ptr);
+	// 	return 1;
+	// }
 	
 	while(ftell(ptr) != *size_bytes){
 		if(fread(&valid_samples, sizeof(uint16_t), 1, ptr) != 1){

@@ -20,8 +20,7 @@
 int 
 main(int argc, char *argv[])
 {
-	struct timeval  tv1, tv2;
-	gettimeofday(&tv1, NULL);
+	double start_time = omp_get_wtime();
 	int num_threads = 1, time_flag = 0, save_flag = 0;
 	int cant_pulsos_archivo, tamano_archivo_bytes;
 
@@ -31,10 +30,10 @@ main(int argc, char *argv[])
 	printf("Ejecutando el codigo con "BOLDGREEN"%d"RESET" hilos.\n", omp_get_max_threads());
 
 	if(leer_numero_pulsos_archivo("pulsos.iq", &cant_pulsos_archivo, &tamano_archivo_bytes) != 0){
-			printf(BOLDRED"Error leyendo numero de pulsos en archivo\n"RESET);
-			exit(EXIT_FAILURE);
-		}
-		
+		printf(BOLDRED"Error leyendo numero de pulsos en archivo\n"RESET);
+		exit(EXIT_FAILURE);
+	}
+
 	struct Pulso pulsos[cant_pulsos_archivo];
 	struct Gate gates[NUM_GATES];
 
@@ -55,15 +54,14 @@ main(int argc, char *argv[])
 	}
 
 	printf("Datos guardados en "BOLDGREEN"'out_mt.txt'\n"RESET);
-	gettimeofday(&tv2, NULL);
-	double execution_time = (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 + (double)(tv2.tv_sec - tv1.tv_sec) ;
-	
+
+	double time = omp_get_wtime() - start_time;
 	if(time_flag){
-		printf ("Tiempo total = "BOLDGREEN"%f"RESET" segundos\n",execution_time);
+		printf ("Tiempo total = "BOLDGREEN"%f"RESET" segundos\n",time);
 	}
 	
 	if(save_flag){
-		if(save_time_to_file(execution_time, num_threads,"times_mt.txt") != 0){
+		if(save_time_to_file(time, num_threads,"times_mt.txt") != 0){
 			printf(BOLDRED"Error guardando tiempo de ejecucion en archivo\n"RESET);
 			exit(EXIT_FAILURE);
 		}

@@ -18,8 +18,9 @@
 int 
 main(int argc, char *argv[])
 {
-	struct timeval  tv1, tv2;
-	gettimeofday(&tv1, NULL);
+	clock_t start, end;
+	start = clock();
+	double cpu_time_used;
 	
 	int time_flag = 0, save_flag = 0;
 	int cant_pulsos_archivo, tamano_archivo_bytes;
@@ -51,14 +52,16 @@ main(int argc, char *argv[])
 		return 1;
 	}
 	printf("Datos guardados en "BOLDGREEN"'out_st.txt'\n"RESET);
-	gettimeofday(&tv2, NULL);
-	double execution_time = (double)(tv2.tv_usec - tv1.tv_usec) / 1000000 + (double)(tv2.tv_sec - tv1.tv_sec) ;
-		if(time_flag){
-		printf ("Tiempo total = "BOLDGREEN"%f"RESET" segundos\n",execution_time);
+	
+	end = clock();
+	cpu_time_used = ((double) (end-start)) / CLOCKS_PER_SEC;
+	
+	if(time_flag){
+		printf ("Tiempo total = "BOLDGREEN"%f"RESET" segundos\n",cpu_time_used);
 	}
 	
 	if(save_flag){
-		if(save_time_to_file(execution_time,"times_st.txt") != 0){
+		if(save_time_to_file(cpu_time_used,"times_st.txt") != 0){
 			printf("Error guardando tiempo de ejecucion en archivo\n");
 			exit(EXIT_FAILURE);
 		}
