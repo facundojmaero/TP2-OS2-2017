@@ -53,6 +53,10 @@ Puede comprobarse que el procesamiento en paralelo es correcto, y que no se prod
 
 Que compara ambos archivos de texto, output de los programas multihilo y monohilo respectivamente. En caso de ser iguales no imprime nada en consola. Si hay diferencias, avisa al usuario e indica la línea donde se encuentra.
 
+También se provee de un bash script que permite ejecutar múltiples veces el programa, guardando las mediciones de tiempo en un archivo de texto, para su posterior análisis. Para ejecutarlo ingrese:
+
+```$ ./script.sh ```
+
 ## 4. CppCheck
 --- 
 Al compilar y linkear, se genera un archivo donde se guardan los posibles errores y advertencias que encuentre el programa CppCheck al realizar el análisis estático del código. Este archivo se encuentra en:
